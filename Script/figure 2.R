@@ -15,6 +15,10 @@ library(scales)
 
 # load data ---------------------------------------------------------------
 
+scientific_10 <- function(x) {
+     ifelse(x == 0, 0, parse(text = gsub("[+]", "", gsub("e", "%*%10^", scales::scientific_format()(x)))))
+}
+
 data_folder <- "./Data/OAG/"
 files <- list.files(data_folder, pattern = "\\.xlsx$", full.names = TRUE)
 file_global_hist <- "./Data/全球入境流量统计.xlsx"
@@ -156,7 +160,7 @@ p_global <- ggplot(df_plot_A, aes(x = Date_Obj, y = Volume, color = Category)) +
      geom_vline(xintercept = as.numeric(last_date), linetype = "dashed", col = "red") +
      geom_line() +
      scale_color_manual(values = c("Global" = "black", "6 Countries" = "#119DA4FF")) +
-     scale_y_continuous(labels = scales::scientific,
+     scale_y_continuous(labels = scientific_10,
                         limits = c(0, NA),
                         expand = expansion(mult = c(0, 0.15))) +
      scale_x_date(date_labels = "%Y",
@@ -195,7 +199,7 @@ p_countries <- ggplot(df_final, aes(x = Date_Obj, y = Inbound_Volume, color = Or
               ymin = -Inf, ymax = Inf, fill = "gray90", alpha = 0.5) +
      geom_line() +
      geom_vline(xintercept = as.numeric(last_date), linetype = "dashed", col = "red") +
-     scale_y_continuous(labels = scales::scientific,
+     scale_y_continuous(labels = scientific_10,
                         limits = c(0, NA),
                         expand = expansion(mult = c(0, 0.15))) +
      scale_x_date(date_labels = "%Y",

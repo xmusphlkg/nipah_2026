@@ -23,7 +23,7 @@ pB_1 <- ggplot(data_panel_B,
      geom_col(fill = "#119DA4FF") +
      scale_x_continuous(expand = expansion(mult = c(0, 0)),
                         limits = c(0, 4)) +
-     labs(x = "Host risk score", y = NULL, title = 'B') +
+     labs(x = "Host risk score", y = NULL, title = 'A') +
      theme_bw()
 
 pB_2 <- ggplot(data_panel_B,
@@ -97,7 +97,7 @@ pC_1 <- ggplot(data_panel_C,
      geom_errorbarh(aes(xmin = Pop_CI_Low, xmax = Pop_CI_High), height = 0.2, color = "#119DA4FF") +
      scale_x_continuous(expand = expansion(mult = c(0, 0)),
                         limits = c(0, 120)) +
-     labs(x = "Population at risk (millions)", y = NULL, title = 'C') +
+     labs(x = "Population at risk (millions)", y = NULL, title = 'B') +
      theme_bw()+
      theme(plot.title.position = "plot")
 
@@ -108,7 +108,8 @@ pC_2 <- ggplot(data_panel_C,
                         limits = c(0, 1)) +
      labs(x = "Normalized spillover risk", y = NULL) +
      theme_bw()+
-     theme(axis.text.y = element_blank())
+     theme(axis.text.y = element_blank(),
+           plot.margin = margin(t = 5, r = 5, b = 5, l = 20))
 
 pC <- pC_1 + pC_2 + plot_layout(nrow = 1, widths = c(1,1))
 
@@ -125,7 +126,7 @@ pD_1 <- ggplot(data_panel_D,
      geom_col(fill = "#119DA4FF") +
      scale_x_continuous(expand = expansion(mult = c(0, 0)),
                         limits = c(0, 100)) +
-     labs(x = "Estimated detection capacity", y = NULL, title = 'D') +
+     labs(x = "Estimated detection capacity", y = NULL, title = 'C') +
      theme_bw()+
      theme(plot.title.position = "plot")
 
@@ -160,7 +161,7 @@ pE <- ggplot(plot_season_df, aes(x = Month)) +
      geom_line(aes(y = Predicted, color = 'Fitted'), size = 1) +
      scale_color_manual(values = c('Average' = "#046E8FFF", 'Fitted' = "#D44D5CFF")) +
      scale_x_continuous(breaks = 1:12, labels = month.abb) +
-     labs(x = "Month", y = "Average monthly cases", title = 'E') +
+     labs(x = "Month", y = "Average monthly cases", title = 'D') +
      theme_bw() +
      theme(legend.position = 'inside',
            legend.direction = "horizontal",
@@ -170,15 +171,10 @@ pE <- ggplot(plot_season_df, aes(x = Month)) +
      
 # Combine all panels ------------------------------------------------------
 
-design <- "
-AF
-BD
-CE
-"
-
-fig <- pA + pB + pC + pD + free(pE) + patchwork::plot_spacer() +
-     plot_layout(design = design, widths = c(1, 0.6), heights = c(0.15, 1, 1)) &
-     theme(plot.title.position = "plot")
+fig <- cowplot::plot_grid(pB, pC,
+                          pD, pE,
+                          rel_widths = c(1, 0.6),
+                          ncol = 2, align = "v")
 
 ggsave("./Outcome/fig3.png",
        fig,

@@ -151,7 +151,10 @@ tip_df2 <- tip_df |>
                by = "acc") |>
      mutate(
           year = str_extract(Collection_Date, "(19|20)[0-9]{2}"),
-          year = as.integer(year)
+          year = as.integer(year),
+          acc = if_else(!Country %in% c("Bangladesh", "India", "Malaysia"), 
+                        paste0(acc, " (", Country, ")"),
+                        acc)
      )
 
 p <- ggtree(tr) %<+% tip_df2 +
@@ -167,8 +170,9 @@ heat_df <- tip_df2 |>
      distinct(label, .keep_all = TRUE) |>
      tibble::column_to_rownames("label")
 
-pC <- gheatmap(p, heat_df,
-               offset = 0.02,
+pC <- gheatmap(p,
+               heat_df,
+               offset = 0.06,
                width  = 0.1,
                colnames = F,
                colnames_angle = 90,
@@ -307,4 +311,4 @@ seasonal_model <- list(
      predict = seasonal_predict
 )
 
-save(seasonal_model, harmonic_fit, file = "./Outcome/seasonal_model.RData")
+save(seasonal_model, harmonic_fit, seasonal_predict, file = "./Outcome/seasonal_model.RData")
