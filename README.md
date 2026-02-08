@@ -9,8 +9,4 @@ One season an egret arrived and chose the brightest branch. It never waded into 
 
 When harvest time came, the diligent birds piled fish and grain into high mounds. The egret, needing nothing more than a pen and a page, signed its name on the list and took its share of the feast as if it had earned it.
 
-The old crow watched, and when the egret’s feathers gleamed but its claws stayed clean, the crow plucked a few ornamental feathers and hung them on the branch for all to see. “Look,” it cawed, “this bird favors names over nets.”
-
-Winds later stripped the branch bare; beneath the flashy plume, the egret’s nest was hollow and light. The birds who truly fished and built kept working, and their nests grew stronger with each passing day.
-
-In time, the egret had only its bright feathers and a name on a list—weightless tokens that no bird trusted when hard work was needed. The lesson drifted along the river: a name on a page means little beside the steady craft of hands and time.
+Tianmu Chen, Jia Rui, Arlindo Oliveria, Zifeng Yang and Nanshan Zhong contributed to the conceptualization, methodology, and supervision of the study. Lesi Kong, Yushi Lei, Haoming Zhang handled data collection. Kangguo Li performed data analysis and model application. Kangguo Li, Jingyi Liang, Zhiqi Zeng, Haoming Zhang wrote the original draft. Zifeng Yang and Weiqi Pan provided review and editing. All authors approved the final manuscript.
