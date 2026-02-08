@@ -192,9 +192,6 @@ p_global_bar <- ggplot(df_plot_B, aes(x = Date_Obj, y = Share_5_Countries)) +
      labs(x = 'Date', y = "Proportion")+
      theme_bw()
 
-p_global <- p_global + p_global_bar + 
-     plot_layout(ncol = 1, heights = c(5, 1))
-
 # B. 5 Countries Trend
 p_countries <- ggplot(df_final, aes(x = Date_Obj, y = Inbound_Volume, color = Origin_Country)) +
      annotate("rect", xmin = as.Date(last_date), xmax = max(df_plot_A$Date_Obj),
@@ -209,14 +206,15 @@ p_countries <- ggplot(df_final, aes(x = Date_Obj, y = Inbound_Volume, color = Or
                   date_breaks = "1 year") +
      scale_color_manual(name = "Country",
                         values = fill_color)+
-     labs(title = "B", x = 'Date', y = "Volume", color = "Country") +
+     labs(title = "B", x = 'Date', y = "Monthly volume", color = "Country") +
      theme_bw() +
      theme(legend.position = "bottom") +
      guides(color = guide_legend(nrow = 1, byrow = TRUE))
 
 # Compose Figure 1
-fig1 <- free(p_global) | p_countries
+fig1 <- p_global + p_global_bar + p_countries +
+     plot_layout(ncol = 1, heights = c(5, 1, 5))
 
 ggsave("./Outcome/fig2.png",
        fig1,
-       width = 14, height = 6, bg="white")
+       width = 8, height = 8, bg="white")

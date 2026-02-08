@@ -16,6 +16,12 @@ library(scales)
 # Merge Global context into Countries
 load("./Outcome/figure2_workspace.RData")
 
+Sys.setlocale("LC_TIME", "English")
+
+scientific_10 <- function(x) {
+     ifelse(x == 0, 0, parse(text = gsub("[+]", "", gsub("e", "%*%10^", scales::scientific_format()(x)))))
+}
+
 # 2. Risk Analysis (Probabilistic Exposure Model)
 # -----------------------------------------------------------------------------
 # Combine three components to compute an exposure score for each origin-month:
@@ -125,7 +131,7 @@ df_analyzed <- df_analyzed |>
 #####################################
 
 plot_start_year <- 2024
-df_plot_risk <- df_analyzed |> filter(Year >= plot_start_year)
+df_plot_risk <- df_analyzed |> filter(Year >= 2022)
 
 fill_colors <- RColorBrewer::brewer.pal(n = 5, name = "RdYlGn")[5:1] # Reverse for proper mapping
 names(fill_colors) <- levels(df_plot_risk$Risk_Level)
@@ -140,33 +146,42 @@ p_risk_trend <- ggplot(df_plot_risk, aes(x = Date_Obj, y = Inbound_Volume, group
      facet_wrap(~Origin_Country, scales = "free_y", ncol = 1) +
      # Ensure all risk levels appear in the legend even if unused
      scale_color_manual(values = fill_colors, drop = FALSE) +
-     scale_y_continuous(labels = scales::comma) +
+     scale_y_continuous(labels = scientific_10,
+                        limits = c(0, NA),
+                        expand = expansion(mult = c(0, 0.15))) +
+     scale_x_date(date_labels = "%b %Y",
+                  expand = c(0, 0),
+                  date_breaks = "6 months") +
      geom_vline(xintercept = as.numeric(last_date), linetype = "dashed", color = "red") +
      labs(
           title = 'A',
           x = NULL, 
-          y = "Inbound Passenger Volume",
+          y = "Monthly volume",
           color = "Risk Level"
      ) +
      theme_bw() +
-     theme(legend.position = "bottom")
+     theme(legend.position = "bottom",
+           plot.title.position = "plot")
 
 # Plot Risk Forecast Bar (Details)
 df_forecast_only <- df_plot_risk |> filter(Type == "Forecast")
 
-p_risk_bar <- ggplot(df_forecast_only, aes(x = as.factor(format(Date_Obj, "%Y-%m")), y = Exposure_Score, fill = Risk_Level)) +
+p_risk_bar <- ggplot(df_forecast_only, aes(x = as.factor(format(Date_Obj, "%b %Y")), y = Exposure_Score, fill = Risk_Level)) +
      geom_col(show.legend = F) +
      facet_wrap(~Origin_Country, scales = "free_y", ncol = 1) +
      # Keep full color scale available for all risk levels
      scale_fill_brewer(palette = "RdYlGn", direction = -1, drop = FALSE) +
+     scale_y_continuous(labels = scientific_10,
+                        limits = c(0, NA),
+                        expand = expansion(mult = c(0, 0.15))) +
      labs(
           title = "B",
-          x = "Forecast Month", y = "Composite Risk Score"
+          x = "Date", y = "Composite risk score"
      ) +
      theme_bw() +
      theme(
-          axis.text.x = element_text(angle = 45, hjust = 1),
-          legend.position = "none" # Shared legend implied or redundant
+          legend.position = "none",
+          plot.title.position = "plot"
      )
 
 # Compose Figure 2
