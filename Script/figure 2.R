@@ -153,6 +153,8 @@ df_plot_B <- df_plot_A |>
      pivot_wider(names_from = Category, values_from = Volume) |> 
      mutate(Share_5_Countries = `6 Countries` / Global)
 
+save.image("./Outcome/figure2_workspace.RData")
+
 p_global <- ggplot(df_plot_A, aes(x = Date_Obj, y = Volume, color = Category)) +
      # Forecast Background
      annotate("rect", xmin = as.Date(last_date), xmax = max(df_plot_A$Date_Obj),
@@ -218,5 +220,3 @@ fig1 <- free(p_global) | p_countries
 ggsave("./Outcome/fig2.png",
        fig1,
        width = 14, height = 6, bg="white")
-
-save.image("./Outcome/figure2_workspace.RData")

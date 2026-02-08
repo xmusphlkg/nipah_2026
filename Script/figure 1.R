@@ -14,6 +14,7 @@ library(treeio)
 library(tidyverse)
 library(ggrepel)
 library(ggtreeExtra) 
+library(phytools)
 
 # Output directory for figures
 out_dir <- "./Outcome/"
@@ -109,9 +110,9 @@ data_panel_B <- data_panel_B |>
 
 # manual fallbacks for countries not found in basemap
 fallbacks <- tibble(
-      country = c('Bangladesh','India','Malaysia','Singapore','Philippines','Thailand'),
-      lon = c(90.4125,77.2090,101.6869,103.8198,120.9842,100.5018),
-      lat = c(23.8103,28.6139,5,1,14.5995,13.7563)
+     country = c('Bangladesh','India','Malaysia','Singapore','Philippines','Thailand','Madagascar','China','Indonesia','Australia'),
+     lon = c(90.4125,77.2090,101.6869,103.8198,120.9842,100.5018,47.5079,104.1954,106.8456,149.1300),
+     lat = c(23.8103,28.6139,5,1,14.5995,13.7563,-18.8792,35.8617,-6.2088,-35.2809)
 )
 
 pB <- ggplot(data = data_panel_B) +
@@ -157,7 +158,11 @@ tip_df2 <- tip_df |>
                         acc)
      )
 
-p <- ggtree(tr) %<+% tip_df2 +
+tr2 <- tr
+tr2 <- unroot(tr2)
+tr2 <- midpoint.root(tr2) 
+
+p <- ggtree(tr2) %<+% tip_df2 +
      geom_tiplab(aes(color = Country, label = acc), size = 2, show.legend = F) +
      scale_color_manual(values = fill_color, na.value = "grey60") +
      theme_tree2() +
@@ -172,7 +177,7 @@ heat_df <- tip_df2 |>
 
 pC <- gheatmap(p,
                heat_df,
-               offset = 0.06,
+               offset = 0.03,
                width  = 0.1,
                colnames = F,
                colnames_angle = 90,
@@ -180,8 +185,8 @@ pC <- gheatmap(p,
      scale_fill_viridis_c(na.value = "grey85",
                           name = "Year") +
      theme(legend.position = "inside",
-           legend.position.inside = c(0.9, 1),
-           legend.justification = c(1, 1),
+           legend.position.inside = c(0, 1),
+           legend.justification = c(0, 1),
            plot.margin = margin(5.5, 30, 5.5, 5.5))+
      labs(title = 'C')
 
@@ -311,4 +316,4 @@ seasonal_model <- list(
      predict = seasonal_predict
 )
 
-save(seasonal_model, harmonic_fit, seasonal_predict, file = "./Outcome/seasonal_model.RData")
+save(seasonal_model, harmonic_fit, seasonal_predict, monthly_avg, file = "./Outcome/seasonal_model.RData")

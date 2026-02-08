@@ -1,43 +1,44 @@
 country,country_href,status,location,started,id,source,cases,deaths,cfr,scraped_at
-India,https://nipah-map.com/country/in,Active,West Bengal State,"Jan 13, 2026",NIP-2026-IN-001,Under investigation,2,0,0%,2026-02-05T13:25:39.897310
-India,https://nipah-map.com/country/in,Historical,Kerala,"May 17, 2025- Ended: Jun 16, 2025",NIP-2025-IN-001,Under investigation,4,2,5000%,2026-02-05T13:25:39.897817
-Bangladesh,https://nipah-map.com/country/bd,Historical,Barisal,"Jan 1, 2025- Ended: Jan 31, 2025",NIP-2025-BD-004,Under investigation,1,1,10000%,2026-02-05T13:25:39.898190
-Bangladesh,https://nipah-map.com/country/bd,Historical,Rajshahi,"Jan 1, 2025- Ended: Jan 31, 2025",NIP-2025-BD-001,Under investigation,2,2,10000%,2026-02-05T13:25:39.898580
-Bangladesh,https://nipah-map.com/country/bd,Historical,Dhaka,"Jan 1, 2025- Ended: Jan 31, 2025",NIP-2025-BD-002,Under investigation,1,1,10000%,2026-02-05T13:25:39.898926
-Bangladesh,https://nipah-map.com/country/bd,Historical,Rajshahi,"Jan 1, 2025- Ended: Mar 31, 2025",NIP-2025-BD-003,Under investigation,5,4,8000%,2026-02-05T13:25:39.899270
-India,https://nipah-map.com/country/in,Historical,"Kerala, Malappuram","Jul 14, 2024- Ended: Jul 21, 2024",NIP-2024-IN-001,Under investigation,1,1,10000%,2026-02-05T13:25:39.899669
-Bangladesh,https://nipah-map.com/country/bd,Historical,Dhaka,"Jan 1, 2024- Ended: Jan 31, 2024",NIP-2024-BD-001,Under investigation,2,2,10000%,2026-02-05T13:25:39.900067
-Bangladesh,https://nipah-map.com/country/bd,Historical,Manikganj,"Jan 1, 2024- Ended: Mar 31, 2024",NIP-2024-BD-002,Under investigation,14,10,7143%,2026-02-05T13:25:39.900475
-India,https://nipah-map.com/country/in,Historical,"Kerala, Kozhikode","Sep 12, 2023- Ended: Oct 15, 2023",NIP-2023-IN-001,Under investigation,6,2,3333%,2026-02-05T13:25:39.900903
-Bangladesh,https://nipah-map.com/country/bd,Historical,Dhaka,"Jan 15, 2023- Ended: Mar 31, 2023",NIP-2023-BD-001,Under investigation,11,8,7273%,2026-02-05T13:25:39.901311
-Bangladesh,https://nipah-map.com/country/bd,Historical,Sylhet,"Jan 1, 2022- Ended: Mar 31, 2022",NIP-2022-BD-001,Under investigation,5,3,6000%,2026-02-05T13:25:39.901693
-India,https://nipah-map.com/country/in,Historical,"Kerala, Kozhikode","Sep 5, 2021- Ended: Sep 15, 2021",NIP-2021-IN-001,Under investigation,1,1,10000%,2026-02-05T13:25:39.902080
-Bangladesh,https://nipah-map.com/country/bd,Historical,Natore,"Jan 1, 2021- Ended: Mar 31, 2021",NIP-2021-BD-001,Under investigation,3,3,10000%,2026-02-05T13:25:39.902468
-Bangladesh,https://nipah-map.com/country/bd,Historical,Rajshahi,"Jan 1, 2020- Ended: Mar 31, 2020",NIP-2020-BD-001,Under investigation,8,5,6250%,2026-02-05T13:25:39.902845
-India,https://nipah-map.com/country/in,Historical,"Kerala, Ernakulam","Jun 1, 2019- Ended: Jun 30, 2019",NIP-2019-IN-001,Under investigation,1,0,0%,2026-02-05T13:25:39.903255
-Bangladesh,https://nipah-map.com/country/bd,Historical,Chapainawabganj,"Jan 1, 2019- Ended: Mar 31, 2019",NIP-2019-BD-001,Under investigation,4,4,10000%,2026-02-05T13:25:39.903719
-India,https://nipah-map.com/country/in,Historical,"Kerala, Kozhikode","May 19, 2018- Ended: Jun 10, 2018",NIP-2018-IN-001,Under investigation,19,17,8947%,2026-02-05T13:25:39.904094
-Bangladesh,https://nipah-map.com/country/bd,Historical,Kushtia,"Feb 1, 2018- Ended: Mar 31, 2018",NIP-2018-BD-001,Under investigation,7,5,7143%,2026-02-05T13:25:39.904472
-Bangladesh,https://nipah-map.com/country/bd,Historical,Rangpur,"Jan 1, 2017- Ended: Mar 31, 2017",NIP-2017-BD-001,Under investigation,3,3,10000%,2026-02-05T13:25:39.904841
-Bangladesh,https://nipah-map.com/country/bd,Historical,Rajshahi,"Jan 1, 2016- Ended: Mar 31, 2016",NIP-2016-BD-001,Under investigation,6,4,6667%,2026-02-05T13:25:39.905209
-Bangladesh,https://nipah-map.com/country/bd,Historical,Nilphamari,"Jan 1, 2015- Ended: Mar 31, 2015",NIP-2015-BD-001,Under investigation,9,6,6667%,2026-02-05T13:25:39.905581
-Philippines,https://nipah-map.com/country/ph,Historical,"Mindanao, South Cotabato","Apr 1, 2014- Ended: May 31, 2014",NIP-2014-PH-001,Under investigation,17,9,5294%,2026-02-05T13:25:39.905953
-Bangladesh,https://nipah-map.com/country/bd,Historical,Manikganj,"Jan 1, 2014- Ended: Mar 31, 2014",NIP-2014-BD-001,Under investigation,18,9,5000%,2026-02-05T13:25:39.906320
-Bangladesh,https://nipah-map.com/country/bd,Historical,Gaibandha,"Jan 1, 2013- Ended: Apr 30, 2013",NIP-2013-BD-001,Under investigation,24,21,8750%,2026-02-05T13:25:39.906688
-Bangladesh,https://nipah-map.com/country/bd,Historical,Joypurhat,"Jan 1, 2012- Ended: Mar 31, 2012",NIP-2012-BD-001,Under investigation,12,10,8333%,2026-02-05T13:25:39.907055
-Bangladesh,https://nipah-map.com/country/bd,Historical,Lalmonirhat,"Jan 15, 2011- Ended: Mar 31, 2011",NIP-2011-BD-001,Under investigation,44,40,9091%,2026-02-05T13:25:39.907425
-Bangladesh,https://nipah-map.com/country/bd,Historical,Faridpur,"Jan 1, 2010- Ended: Mar 31, 2010",NIP-2010-BD-001,Under investigation,16,14,8750%,2026-02-05T13:25:39.907793
-Bangladesh,https://nipah-map.com/country/bd,Historical,Rajbari,"Jan 1, 2009- Ended: Mar 31, 2009",NIP-2009-BD-001,Under investigation,4,1,2500%,2026-02-05T13:25:39.908160
-Bangladesh,https://nipah-map.com/country/bd,Historical,Manikganj,"Feb 1, 2008- Ended: Mar 31, 2008",NIP-2008-BD-001,Under investigation,11,8,7273%,2026-02-05T13:25:39.908534
-India,https://nipah-map.com/country/in,Historical,"West Bengal, Nadia","Apr 1, 2007- Ended: Apr 30, 2007",NIP-2007-IN-001,Under investigation,5,5,10000%,2026-02-05T13:25:39.908906
-Bangladesh,https://nipah-map.com/country/bd,Historical,Thakurgaon,"Jan 1, 2007- Ended: Mar 31, 2007",NIP-2007-BD-001,Under investigation,18,9,5000%,2026-02-05T13:25:39.909276
-Bangladesh,https://nipah-map.com/country/bd,Historical,Tangail,"Jan 11, 2005- Ended: Feb 28, 2005",NIP-2005-BD-001,Under investigation,12,11,9167%,2026-02-05T13:25:39.909652
-Bangladesh,https://nipah-map.com/country/bd,Historical,Faridpur district,"Apr 20, 2004- Ended: May 20, 2004",NIP-2004-BD-003,Under investigation,18,18,10000%,2026-02-05T13:25:39.910022
-Bangladesh,https://nipah-map.com/country/bd,Historical,Manikganj,"Jan 4, 2004- Ended: Feb 3, 2004",NIP-2004-BD-002,Under investigation,35,10,2857%,2026-02-05T13:25:39.910399
-Bangladesh,https://nipah-map.com/country/bd,Historical,Rajbari,"Jan 1, 2004- Ended: Mar 31, 2004",NIP-2004-BD-001,Under investigation,67,50,7463%,2026-02-05T13:25:39.910765
-Bangladesh,https://nipah-map.com/country/bd,Historical,Naogaon,"Jan 1, 2003- Ended: Feb 28, 2003",NIP-2003-BD-001,Under investigation,12,8,6667%,2026-02-05T13:25:39.911133
-Bangladesh,https://nipah-map.com/country/bd,Historical,Meherpur,"Apr 1, 2001- Ended: May 31, 2001",NIP-2001-BD-001,Under investigation,13,9,6923%,2026-02-05T13:25:39.911504
-India,https://nipah-map.com/country/in,Historical,"West Bengal, Siliguri","Jan 31, 2001- Ended: Feb 23, 2001",NIP-2001-IN-001,Under investigation,66,45,6818%,2026-02-05T13:25:39.911876
-Singapore,https://nipah-map.com/country/sg,Historical,Singapore,"Mar 10, 1999- Ended: Mar 19, 1999",NIP-1999-SG-001,Under investigation,11,1,909%,2026-02-05T13:25:39.912241
-Malaysia,https://nipah-map.com/country/my,Historical,"Negeri Sembilan, Seremban","Jan 15, 1999- Ended: Apr 30, 1999",NIP-1999-MY-001,Under investigation,93,38,4086%,2026-02-05T13:25:39.912618
-Malaysia,https://nipah-map.com/country/my,Historical,"Perak, Ipoh","Sep 29, 1998- Ended: May 31, 1999",NIP-1998-MY-001,Under investigation,265,105,3962%,2026-02-05T13:25:39.912993
+Bangladesh,https://nipah-map.com/country/bd,Active,Rajshahi Division,"Jan 21, 2026",NIP-2026-BD-001,Under investigation,1,0,0%,2026-02-08T00:49:55.162017
+India,https://nipah-map.com/country/in,Active,West Bengal State,"Jan 13, 2026",NIP-2026-IN-001,Under investigation,2,0,0%,2026-02-08T00:49:55.162500
+India,https://nipah-map.com/country/in,Historical,Kerala,"May 17, 2025- Ended: Jun 16, 2025",NIP-2025-IN-001,Under investigation,4,2,5000%,2026-02-08T00:49:55.162904
+Bangladesh,https://nipah-map.com/country/bd,Historical,Rajshahi,"Jan 1, 2025- Ended: Mar 31, 2025",NIP-2025-BD-003,Under investigation,5,4,8000%,2026-02-08T00:49:55.163287
+Bangladesh,https://nipah-map.com/country/bd,Historical,Rajshahi,"Jan 1, 2025- Ended: Jan 31, 2025",NIP-2025-BD-001,Under investigation,2,2,10000%,2026-02-08T00:49:55.163682
+Bangladesh,https://nipah-map.com/country/bd,Historical,Dhaka,"Jan 1, 2025- Ended: Jan 31, 2025",NIP-2025-BD-002,Under investigation,1,1,10000%,2026-02-08T00:49:55.164039
+Bangladesh,https://nipah-map.com/country/bd,Historical,Barisal,"Jan 1, 2025- Ended: Jan 31, 2025",NIP-2025-BD-004,Under investigation,1,1,10000%,2026-02-08T00:49:55.164413
+India,https://nipah-map.com/country/in,Historical,"Kerala, Malappuram","Jul 14, 2024- Ended: Jul 21, 2024",NIP-2024-IN-001,Under investigation,1,1,10000%,2026-02-08T00:49:55.164760
+Bangladesh,https://nipah-map.com/country/bd,Historical,Dhaka,"Jan 1, 2024- Ended: Jan 31, 2024",NIP-2024-BD-001,Under investigation,2,2,10000%,2026-02-08T00:49:55.165114
+Bangladesh,https://nipah-map.com/country/bd,Historical,Manikganj,"Jan 1, 2024- Ended: Mar 31, 2024",NIP-2024-BD-002,Under investigation,14,10,7143%,2026-02-08T00:49:55.165470
+India,https://nipah-map.com/country/in,Historical,"Kerala, Kozhikode","Sep 12, 2023- Ended: Oct 15, 2023",NIP-2023-IN-001,Under investigation,6,2,3333%,2026-02-08T00:49:55.165834
+Bangladesh,https://nipah-map.com/country/bd,Historical,Dhaka,"Jan 15, 2023- Ended: Mar 31, 2023",NIP-2023-BD-001,Under investigation,11,8,7273%,2026-02-08T00:49:55.166206
+Bangladesh,https://nipah-map.com/country/bd,Historical,Sylhet,"Jan 1, 2022- Ended: Mar 31, 2022",NIP-2022-BD-001,Under investigation,5,3,6000%,2026-02-08T00:49:55.166581
+India,https://nipah-map.com/country/in,Historical,"Kerala, Kozhikode","Sep 5, 2021- Ended: Sep 15, 2021",NIP-2021-IN-001,Under investigation,1,1,10000%,2026-02-08T00:49:55.166971
+Bangladesh,https://nipah-map.com/country/bd,Historical,Natore,"Jan 1, 2021- Ended: Mar 31, 2021",NIP-2021-BD-001,Under investigation,3,3,10000%,2026-02-08T00:49:55.167355
+Bangladesh,https://nipah-map.com/country/bd,Historical,Rajshahi,"Jan 1, 2020- Ended: Mar 31, 2020",NIP-2020-BD-001,Under investigation,8,5,6250%,2026-02-08T00:49:55.167727
+India,https://nipah-map.com/country/in,Historical,"Kerala, Ernakulam","Jun 1, 2019- Ended: Jun 30, 2019",NIP-2019-IN-001,Under investigation,1,0,0%,2026-02-08T00:49:55.168102
+Bangladesh,https://nipah-map.com/country/bd,Historical,Chapainawabganj,"Jan 1, 2019- Ended: Mar 31, 2019",NIP-2019-BD-001,Under investigation,4,4,10000%,2026-02-08T00:49:55.168470
+India,https://nipah-map.com/country/in,Historical,"Kerala, Kozhikode","May 19, 2018- Ended: Jun 10, 2018",NIP-2018-IN-001,Under investigation,19,17,8947%,2026-02-08T00:49:55.168845
+Bangladesh,https://nipah-map.com/country/bd,Historical,Kushtia,"Feb 1, 2018- Ended: Mar 31, 2018",NIP-2018-BD-001,Under investigation,7,5,7143%,2026-02-08T00:49:55.169220
+Bangladesh,https://nipah-map.com/country/bd,Historical,Rangpur,"Jan 1, 2017- Ended: Mar 31, 2017",NIP-2017-BD-001,Under investigation,3,3,10000%,2026-02-08T00:49:55.169592
+Bangladesh,https://nipah-map.com/country/bd,Historical,Rajshahi,"Jan 1, 2016- Ended: Mar 31, 2016",NIP-2016-BD-001,Under investigation,6,4,6667%,2026-02-08T00:49:55.169959
+Bangladesh,https://nipah-map.com/country/bd,Historical,Nilphamari,"Jan 1, 2015- Ended: Mar 31, 2015",NIP-2015-BD-001,Under investigation,9,6,6667%,2026-02-08T00:49:55.170342
+Philippines,https://nipah-map.com/country/ph,Historical,"Mindanao, South Cotabato","Apr 1, 2014- Ended: May 31, 2014",NIP-2014-PH-001,Under investigation,17,9,5294%,2026-02-08T00:49:55.170718
+Bangladesh,https://nipah-map.com/country/bd,Historical,Manikganj,"Jan 1, 2014- Ended: Mar 31, 2014",NIP-2014-BD-001,Under investigation,18,9,5000%,2026-02-08T00:49:55.171103
+Bangladesh,https://nipah-map.com/country/bd,Historical,Gaibandha,"Jan 1, 2013- Ended: Apr 30, 2013",NIP-2013-BD-001,Under investigation,24,21,8750%,2026-02-08T00:49:55.171474
+Bangladesh,https://nipah-map.com/country/bd,Historical,Joypurhat,"Jan 1, 2012- Ended: Mar 31, 2012",NIP-2012-BD-001,Under investigation,12,10,8333%,2026-02-08T00:49:55.171847
+Bangladesh,https://nipah-map.com/country/bd,Historical,Lalmonirhat,"Jan 15, 2011- Ended: Mar 31, 2011",NIP-2011-BD-001,Under investigation,44,40,9091%,2026-02-08T00:49:55.172247
+Bangladesh,https://nipah-map.com/country/bd,Historical,Faridpur,"Jan 1, 2010- Ended: Mar 31, 2010",NIP-2010-BD-001,Under investigation,16,14,8750%,2026-02-08T00:49:55.172639
+Bangladesh,https://nipah-map.com/country/bd,Historical,Rajbari,"Jan 1, 2009- Ended: Mar 31, 2009",NIP-2009-BD-001,Under investigation,4,1,2500%,2026-02-08T00:49:55.173021
+Bangladesh,https://nipah-map.com/country/bd,Historical,Manikganj,"Feb 1, 2008- Ended: Mar 31, 2008",NIP-2008-BD-001,Under investigation,11,8,7273%,2026-02-08T00:49:55.173622
+India,https://nipah-map.com/country/in,Historical,"West Bengal, Nadia","Apr 1, 2007- Ended: Apr 30, 2007",NIP-2007-IN-001,Under investigation,5,5,10000%,2026-02-08T00:49:55.174048
+Bangladesh,https://nipah-map.com/country/bd,Historical,Thakurgaon,"Jan 1, 2007- Ended: Mar 31, 2007",NIP-2007-BD-001,Under investigation,18,9,5000%,2026-02-08T00:49:55.174465
+Bangladesh,https://nipah-map.com/country/bd,Historical,Tangail,"Jan 11, 2005- Ended: Feb 28, 2005",NIP-2005-BD-001,Under investigation,12,11,9167%,2026-02-08T00:49:55.174867
+Bangladesh,https://nipah-map.com/country/bd,Historical,Faridpur district,"Apr 20, 2004- Ended: May 20, 2004",NIP-2004-BD-003,Under investigation,18,18,10000%,2026-02-08T00:49:55.175273
+Bangladesh,https://nipah-map.com/country/bd,Historical,Manikganj,"Jan 4, 2004- Ended: Feb 3, 2004",NIP-2004-BD-002,Under investigation,35,10,2857%,2026-02-08T00:49:55.175666
+Bangladesh,https://nipah-map.com/country/bd,Historical,Rajbari,"Jan 1, 2004- Ended: Mar 31, 2004",NIP-2004-BD-001,Under investigation,67,50,7463%,2026-02-08T00:49:55.176080
+Bangladesh,https://nipah-map.com/country/bd,Historical,Naogaon,"Jan 1, 2003- Ended: Feb 28, 2003",NIP-2003-BD-001,Under investigation,12,8,6667%,2026-02-08T00:49:55.176479
+Bangladesh,https://nipah-map.com/country/bd,Historical,Meherpur,"Apr 1, 2001- Ended: May 31, 2001",NIP-2001-BD-001,Under investigation,13,9,6923%,2026-02-08T00:49:55.176886
+India,https://nipah-map.com/country/in,Historical,"West Bengal, Siliguri","Jan 31, 2001- Ended: Feb 23, 2001",NIP-2001-IN-001,Under investigation,66,45,6818%,2026-02-08T00:49:55.177280
+Singapore,https://nipah-map.com/country/sg,Historical,Singapore,"Mar 10, 1999- Ended: Mar 19, 1999",NIP-1999-SG-001,Under investigation,11,1,909%,2026-02-08T00:49:55.177721
+Malaysia,https://nipah-map.com/country/my,Historical,"Negeri Sembilan, Seremban","Jan 15, 1999- Ended: Apr 30, 1999",NIP-1999-MY-001,Under investigation,93,38,4086%,2026-02-08T00:49:55.178127
+Malaysia,https://nipah-map.com/country/my,Historical,"Perak, Ipoh","Sep 29, 1998- Ended: May 31, 1999",NIP-1998-MY-001,Under investigation,265,105,3962%,2026-02-08T00:49:55.178511
