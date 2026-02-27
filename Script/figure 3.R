@@ -1,6 +1,7 @@
 
 library(tidyverse)
 library(openxlsx)
+library(patchwork)
 
 # panel A -----------------------------------------------------------------
 
@@ -105,11 +106,12 @@ pC_2 <- ggplot(data_panel_C,
                   aes(y = Country))+
      geom_col(aes(x = spillover), fill = "#119DA4FF") +
      scale_x_continuous(expand = expansion(mult = c(0, 0)),
+                        breaks = seq(0, 1, by = 0.2),
                         limits = c(0, 1)) +
      labs(x = "Normalized spillover risk", y = NULL) +
      theme_bw()+
      theme(axis.text.y = element_blank(),
-           plot.margin = margin(t = 5, r = 5, b = 5, l = 20))
+           plot.margin = margin(l = 20))
 
 pC <- pC_1 + pC_2 + plot_layout(nrow = 1, widths = c(1,1))
 
@@ -134,10 +136,12 @@ pD_2 <- ggplot(data_panel_D,
                   aes(y = Country, x = Detect_score))+
      geom_col(fill = "#119DA4FF") +
      scale_x_continuous(expand = expansion(mult = c(0, 0)),
+                        breaks = seq(0, 1, by = 0.2),
                         limits = c(0, 1)) +
      labs(x = "Normalized detection risk", y = NULL) +
      theme_bw()+
-     theme(axis.text.y = element_blank())
+     theme(axis.text.y = element_blank(),
+           plot.margin = margin(l = 20))
 
 pD <- pD_1 + pD_2 + plot_layout(nrow = 1, widths = c(1,1))
 

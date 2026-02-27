@@ -4,7 +4,7 @@
 ## @Author: Li Kangguo
 ## @Date: 2026-02-05 22:24:56
 ## @LastEditors: Li Kangguo
-## @LastEditTime: 2026-02-06 11:34:25
+## @LastEditTime: 2026-02-27 11:45:39
 #####################################
 
 library(sf)
@@ -15,6 +15,10 @@ library(tidyverse)
 library(ggrepel)
 library(ggtreeExtra) 
 library(phytools)
+library(ggthemes)
+library(ggspatial)
+library(maptiles)
+library(terra)
 
 # Output directory for figures
 out_dir <- "./Outcome/"
@@ -52,7 +56,7 @@ p_cases <- ggplot(data_panel_A) +
                        name = 'Country') +
      labs(title = 'A',
           x = NULL,
-          y = 'Number of Cases') +
+          y = 'Number of cases') +
      theme_bw() +
      theme(legend.position = 'none',
            plot.title.position = 'plot',
@@ -75,7 +79,7 @@ p_deaths <- ggplot(data_panel_A) +
      labs(title = NULL,
           x = 'Year',
           fill = 'Country',
-          y = 'Number of Deaths') +
+          y = 'Number of deaths') +
      theme_bw() +
      theme(legend.position = 'bottom',
            panel.grid = element_blank())+
@@ -111,23 +115,48 @@ data_panel_B <- data_panel_B |>
 # manual fallbacks for countries not found in basemap
 fallbacks <- tibble(
      country = c('Bangladesh','India','Malaysia','Singapore','Philippines','Thailand','Madagascar','China','Indonesia','Australia'),
-     lon = c(90.4125,77.2090,101.6869,103.8198,120.9842,100.5018,47.5079,104.1954,106.8456,149.1300),
+     lon = c(90.4125,77.2090,101.6869,103.8198,120.9842,100.5018,47.5079,104.1954,106.8456,130),
      lat = c(23.8103,28.6139,5,1,14.5995,13.7563,-18.8792,35.8617,-6.2088,-35.2809)
 )
 
-pB <- ggplot(data = data_panel_B) +
+# fetch Satellite tiles for background (Esri.WorldImagery)
+osm_bbox <- st_bbox(c(xmin = 30, xmax = 160, ymin = -50, ymax = 50), crs = st_crs(4326))
+osm_area <- st_as_sfc(osm_bbox)
+
+osm_tiles <- get_tiles(
+     x = osm_area,
+     provider = "Esri.WorldImagery",
+     zoom = 4,
+     crop = TRUE,
+     project = FALSE
+)
+
+pB <- ggplot() +
+     layer_spatial(osm_tiles) +
      # geom_sf(data = basemap, fill = 'grey95', color = 'grey60') +
      # geom_sf(data = china_border, fill = 'white', color = 'black', size = 0.1) +
      # add country labels (no basemap shown)
      # geom_point(data = fallbacks, aes(x = lon, y = lat), inherit.aes = FALSE, colour = 'black', size = 1) +
      geom_text(data = fallbacks, aes(x = lon, y = lat, label = country), inherit.aes = FALSE,
-               size = 4) +
-     geom_point(aes(x = decimalLongitude, y = decimalLatitude, color = species_clean), size = 0.05, alpha = 0.3)+
-     coord_sf(xlim = c(35, 150), ylim = c(-50, 50)) +
-     scale_fill_viridis_d()+
-     labs(title = 'B') +
-     theme_void()+
-     theme(legend.text = element_text(face = 'italic'))+
+               size = 4, color = "white", fontface = "bold") +
+     geom_point(data = data_panel_B,
+               aes(x = decimalLongitude, y = decimalLatitude, color = species_clean),
+               size = 0.5, alpha = 0.6) +
+     coord_sf(xlim = c(30, 160), ylim = c(-50, 50), crs = 4326, expand = FALSE) +
+     scale_x_continuous(breaks = seq(30, 160, by = 20),
+                        expand = c(0, 0),
+                        labels = function(x) paste0(x, "°E")) +
+     scale_y_continuous(breaks = seq(-50, 50, by = 20),
+                        expand = c(0, 0),
+                        labels = function(y) ifelse(y > 0, paste0(y, "°N"), ifelse(y < 0, paste0(abs(y), "°S"), "0°"))) +
+     scale_color_viridis_d()+
+     labs(title = 'B', x = "Longitude", y = "Latitude") +
+     theme_bw()+
+     theme(legend.text = element_text(face = 'italic'),
+           legend.position = 'right',
+           plot.title.position = 'plot',
+           panel.grid.major = element_line(color = "white", linewidth = 0.1),
+           panel.grid.minor = element_blank())+
      guides(color = guide_legend(title = 'Species', override.aes = list(size = 4)))
 
 # panel C -----------------------------------------------------------------
@@ -196,7 +225,7 @@ final_plot <- cowplot::plot_grid(
      free(p_cases / p_deaths) + pB + plot_layout(ncol = 1, heights = c(1, 1)),
      pC,
      ncol = 2,
-     rel_widths = c(1.2, 1)
+     rel_widths = c(1.5, 1)
 )
 
 ggsave(filename = './Outcome/fig1.png',
@@ -204,7 +233,6 @@ ggsave(filename = './Outcome/fig1.png',
        width = 12,
        height = 8,
        dpi = 300)
-
 
 # Risk Calculation (Eco-Viral Weighted Index) -----------------------------
 

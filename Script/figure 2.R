@@ -4,7 +4,7 @@
 ## @Author: Li Kangguo
 ## @Date: 2026-02-04 15:04:57
 ## @LastEditors: Li Kangguo
-## @LastEditTime: 2026-02-04 18:01:07
+## @LastEditTime: 2026-02-27 11:01:39
 #####################################
 
 library(openxlsx)
@@ -155,20 +155,30 @@ df_plot_B <- df_plot_A |>
 
 save.image("./Outcome/figure2_workspace.RData")
 
-p_global <- ggplot(df_plot_A, aes(x = Date_Obj, y = Volume, color = Category)) +
+# Prepare y-axis breaks (show in millions, ticks at 0.5, 1.0, 1.5, ...)
+max_vol_A_m <- max(df_plot_A$Volume, na.rm = TRUE) / 1e6
+y_break_max_A <- ceiling(max_vol_A_m)
+breaks_A <- seq(0, y_break_max_A, by = 1)
+
+max_vol_c_m <- max(df_final$Inbound_Volume, na.rm = TRUE) / 1e6
+y_break_max_c <- ceiling(max_vol_c_m * 2) / 2
+breaks_c <- seq(0, y_break_max_c, by = 0.2)
+
+p_global <- ggplot(df_plot_A, aes(x = Date_Obj, y = Volume / 1e6, color = Category)) +
      # Forecast Background
      annotate("rect", xmin = as.Date(last_date), xmax = max(df_plot_A$Date_Obj),
               ymin = -Inf, ymax = Inf, fill = "gray90", alpha = 0.5) +
      geom_vline(xintercept = as.numeric(last_date), linetype = "dashed", col = "red") +
      geom_line() +
      scale_color_manual(values = c("Global" = "black", "6 Countries" = "#119DA4FF")) +
-     scale_y_continuous(labels = scientific_10,
-                        limits = c(0, NA),
-                        expand = expansion(mult = c(0, 0.15))) +
+     scale_y_continuous(labels = scales::number_format(accuracy = 0.1),
+                        breaks = breaks_A,
+                        limits = c(0, y_break_max_A),
+                        expand = expansion(mult = c(0, 0))) +
      scale_x_date(date_labels = "%Y",
                   expand = c(0, 0),
                   date_breaks = "1 year") +
-     labs(title = "A", x = NULL, y = "Monthly Volume")+
+     labs(title = "A", x = NULL, y = "Monthly volume (millions)")+ 
      theme_bw() +
      theme(legend.position = c(0.4, 0.99),
            legend.justification = c(0, 1),
@@ -193,27 +203,28 @@ p_global_bar <- ggplot(df_plot_B, aes(x = Date_Obj, y = Share_5_Countries)) +
      theme_bw()
 
 # B. 5 Countries Trend
-p_countries <- ggplot(df_final, aes(x = Date_Obj, y = Inbound_Volume, color = Origin_Country)) +
+p_countries <- ggplot(df_final, aes(x = Date_Obj, y = Inbound_Volume / 1e6, color = Origin_Country)) +
      annotate("rect", xmin = as.Date(last_date), xmax = max(df_plot_A$Date_Obj),
               ymin = -Inf, ymax = Inf, fill = "gray90", alpha = 0.5) +
      geom_line() +
      geom_vline(xintercept = as.numeric(last_date), linetype = "dashed", col = "red") +
-     scale_y_continuous(labels = scientific_10,
-                        limits = c(0, NA),
-                        expand = expansion(mult = c(0, 0.15))) +
+     scale_y_continuous(labels = scales::number_format(accuracy = 0.1),
+                        breaks = breaks_c,
+                        limits = c(0, 1),
+                        expand = expansion(mult = c(0, 0))) +
      scale_x_date(date_labels = "%Y",
                   expand = c(0, 0),
                   date_breaks = "1 year") +
      scale_color_manual(name = "Country",
                         values = fill_color)+
-     labs(title = "B", x = 'Date', y = "Monthly volume", color = "Country") +
+     labs(title = "B", x = 'Date', y = "Monthly volume (millions)", color = "Country") +
      theme_bw() +
      theme(legend.position = "bottom") +
      guides(color = guide_legend(nrow = 1, byrow = TRUE))
 
 # Compose Figure 1
-fig1 <- p_global + p_global_bar + p_countries +
-     plot_layout(ncol = 1, heights = c(5, 1, 5))
+fig1 <- p_global + p_countries +
+     plot_layout(ncol = 1, heights = c(5, 5))
 
 ggsave("./Outcome/fig2.png",
        fig1,

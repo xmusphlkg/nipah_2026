@@ -4,7 +4,7 @@
 ## @Author: Li Kangguo
 ## @Date: 2026-02-04 15:04:57
 ## @LastEditors: Li Kangguo
-## @LastEditTime: 2026-02-04 18:01:07
+## @LastEditTime: 2026-02-27 11:10:04
 #####################################
 
 library(openxlsx)
@@ -146,9 +146,10 @@ p_risk_trend <- ggplot(df_plot_risk, aes(x = Date_Obj, y = Inbound_Volume, group
      facet_wrap(~Origin_Country, scales = "free_y", ncol = 1) +
      # Ensure all risk levels appear in the legend even if unused
      scale_color_manual(values = fill_colors, drop = FALSE) +
-     scale_y_continuous(labels = scientific_10,
-                        limits = c(0, NA),
-                        expand = expansion(mult = c(0, 0.15))) +
+     # Let ggplot compute per-facet breaks (scales = "free_y") but format labels in millions
+     scale_y_continuous(labels = scales::label_number(scale = 1e-6, accuracy = 0.01),
+                            limits = c(0, NA),
+                            expand = expansion(mult = c(0, 0.15))) +
      scale_x_date(date_labels = "%b %Y",
                   expand = c(0, 0),
                   date_breaks = "6 months") +
@@ -156,7 +157,7 @@ p_risk_trend <- ggplot(df_plot_risk, aes(x = Date_Obj, y = Inbound_Volume, group
      labs(
           title = 'A',
           x = NULL, 
-          y = "Monthly volume",
+              y = "Monthly volume (millions)",
           color = "Risk Level"
      ) +
      theme_bw() +
@@ -166,7 +167,9 @@ p_risk_trend <- ggplot(df_plot_risk, aes(x = Date_Obj, y = Inbound_Volume, group
 # Plot Risk Forecast Bar (Details)
 df_forecast_only <- df_plot_risk |> filter(Type == "Forecast")
 
-p_risk_bar <- ggplot(df_forecast_only, aes(x = as.factor(format(Date_Obj, "%b %Y")), y = Exposure_Score, fill = Risk_Level)) +
+# Use actual Date_Obj on x and format as dates so ordering is chronological;
+# rotate labels to avoid overlap and show monthly ticks for the forecast horizon.
+p_risk_bar <- ggplot(df_forecast_only, aes(x = Date_Obj, y = Exposure_Score, fill = Risk_Level)) +
      geom_col(show.legend = F) +
      facet_wrap(~Origin_Country, scales = "free_y", ncol = 1) +
      # Keep full color scale available for all risk levels
@@ -174,6 +177,9 @@ p_risk_bar <- ggplot(df_forecast_only, aes(x = as.factor(format(Date_Obj, "%b %Y
      scale_y_continuous(labels = scientific_10,
                         limits = c(0, NA),
                         expand = expansion(mult = c(0, 0.15))) +
+     scale_x_date(date_labels = "%b %Y",
+                  date_breaks = "1 month",
+                  expand = c(0, 0)) +
      labs(
           title = "B",
           x = "Date", y = "Composite risk score"
