@@ -212,9 +212,11 @@ pC <- gheatmap(p,
                colnames_angle = 90,
                font.size = 3) +
      scale_fill_viridis_c(na.value = "grey85",
+                          breaks = seq(1998, 2026, by = 3),
+                          guide = guide_colorbar(title = "Collection Year", barwidth = 1, barheight = 12),
                           name = "Year") +
      theme(legend.position = "inside",
-           legend.position.inside = c(0, 1),
+           legend.position.inside = c(0.3, 1),
            legend.justification = c(0, 1),
            plot.margin = margin(5.5, 30, 5.5, 5.5))+
      labs(title = 'C')

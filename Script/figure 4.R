@@ -182,7 +182,7 @@ p_risk_bar <- ggplot(df_forecast_only, aes(x = Date_Obj, y = Exposure_Score, fil
                   expand = c(0, 0)) +
      labs(
           title = "B",
-          x = "Date", y = "Composite risk score"
+          x = "Date", y = "Importation risk score"
      ) +
      theme_bw() +
      theme(
