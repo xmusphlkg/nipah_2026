@@ -1,4 +1,15 @@
 
+#####################################
+## @Description: Generate Figure 3 (component risks: reservoir,
+##               spillover, detection, and seasonality) and export
+##               fig3_risk_metadata.csv for the importation model.
+## @version: 1.0
+## @Author: Li Kangguo
+## @Date: 2026-02-04 15:04:57
+## @LastEditors: Li Kangguo
+## @LastEditTime: 2026-02-28 12:00:00
+#####################################
+
 library(tidyverse)
 library(openxlsx)
 library(patchwork)
@@ -20,19 +31,17 @@ pA <- ggplot() +
 data_panel_B <- read.csv("./Outcome/risk_assessment.csv")
 
 pB_1 <- ggplot(data_panel_B,
-               aes(y = Country, x = Score_Host)) +
+               aes(y = Country, x = GBIF_Recs)) +
      geom_col(fill = "#119DA4FF") +
-     scale_x_continuous(expand = expansion(mult = c(0, 0)),
-                        limits = c(0, 4)) +
-     labs(x = "Host risk score", y = NULL, title = 'A') +
+     scale_x_continuous(expand = expansion(mult = c(0, 0.1))) +
+     labs(x = "Host occurrences (GBIF)", y = NULL, title = 'A') +
      theme_bw()
 
 pB_2 <- ggplot(data_panel_B,
-               aes(y = Country, x = Score_Virus)) +
+               aes(y = Country, x = NCBI_Seqs)) +
      geom_col(fill = "#119DA4FF") +
-     scale_x_continuous(expand = expansion(mult = c(0, 0)),
-                        limits = c(0, 16)) +
-     labs(x = "Virus risk score", y = NULL) +
+     scale_x_continuous(expand = expansion(mult = c(0, 0.1))) +
+     labs(x = "Viral sequences (NCBI)", y = NULL) +
      theme_bw()+
      theme(axis.text.y = element_blank())
 
@@ -40,8 +49,9 @@ pB_3 <- ggplot(data_panel_B,
                aes(y = Country, x = Reservoir_Risk_Calculated)) + 
      geom_col(fill = "#119DA4FF") +
      scale_x_continuous(expand = expansion(mult = c(0, 0)),
-                        limits = c(0, 5)) +
-     labs(x = "Reservoir risk score", y = NULL) +
+                        breaks = seq(0, 1, by = 0.2),
+                        limits = c(0, 1.05)) +
+     labs(x = "Composite reservoir risk (0-1)", y = NULL) +
      theme_bw()+
      theme(axis.text.y = element_blank())
 
@@ -120,8 +130,14 @@ pC <- pC_1 + pC_2 + plot_layout(nrow = 1, widths = c(1,1))
 data_panel_D <- read.xlsx("./Data/GHS/2021.xlsx")
 
 data_panel_D <- data_panel_D |>
-     select(Country, Detect) |> 
-     mutate(Detect_score = scales::rescale(-Detect, to = c(0.01, 1)))
+     select(Country, Detect) |>
+     mutate(
+          # Normalize GHS score (0-100) to 0-1, then invert so that high capacity = low risk.
+          Detect_Normalized = scales::rescale(Detect, to = c(0, 0.99)),
+          Detect_score = 1 - Detect_Normalized,
+          # Ensure strict lower bound to prevent pure zero in multiplicative model
+          Detect_score = pmax(Detect_score, 0.01)
+     )
 
 pD_1 <- ggplot(data_panel_D,
                   aes(y = Country, x = Detect))+
@@ -149,23 +165,35 @@ pD <- pD_1 + pD_2 + plot_layout(nrow = 1, widths = c(1,1))
 
 load("./Outcome/seasonal_model.RData")
 
-print(summary(harmonic_fit))
+# Read raw outbreak records and aggregate to Year-Month observations
+library(lubridate)
+outbreaks_raw <- read.csv("./Data/Outbreak/outbreaks_nipah.csv", stringsAsFactors = FALSE)
 
-# Plot fitted seasonal curve vs observed monthly averages
-season_pred <- tibble(Month = 1:12,
-                      Predicted = seasonal_predict(1:12))
+obs_monthly <- outbreaks_raw |>
+     mutate(start_parsed = str_extract(started, "^[^-]+"),
+            Date = mdy(str_trim(start_parsed)),
+            cases = as.numeric(cases)) |>
+     filter(!is.na(Date)) |>
+     mutate(Year = year(Date), Month = month(Date)) |>
+     group_by(Year, Month) |>
+     summarise(Cases = sum(cases, na.rm = TRUE), .groups = 'drop')
 
-# Combine with monthly statistics for plotting
-plot_season_df <- monthly_avg |>
-     left_join(season_pred, by = "Month") |>
-     mutate(MonthLabel = factor(month.abb[Month], levels = month.abb))
+# Extract bootstrap summaries from seasonal_model
+season_pred <- tibble(
+     Month = 1:12,
+     Predicted = seasonal_model$pred_mean,
+     Lower = seasonal_model$pred_lower,
+     Upper = seasonal_model$pred_upper
+)
 
-pE <- ggplot(plot_season_df, aes(x = Month)) +
-     geom_point(aes(y = AvgCases, color = 'Average'), size = 3) +
-     geom_line(aes(y = Predicted, color = 'Fitted'), size = 1) +
-     scale_color_manual(values = c('Average' = "#046E8FFF", 'Fitted' = "#D44D5CFF")) +
+# Plot: show raw Year-Month observations as jittered points + fitted line and CI
+pE <- ggplot() +
+     geom_jitter(data = obs_monthly, aes(x = Month, y = Cases, color = 'Observed'), width = 0.15, height = 0, size = 2, alpha = 0.8) +
+     geom_ribbon(data = season_pred, aes(x = Month, ymin = Lower, ymax = Upper), fill = "#D44D5CFF", alpha = 0.2) +
+     geom_line(data = season_pred, aes(x = Month, y = Predicted, color = 'Fitted'), size = 1) +
+     scale_color_manual(values = c('Observed' = "#046E8FFF", 'Fitted' = "#D44D5CFF")) +
      scale_x_continuous(breaks = 1:12, labels = month.abb) +
-     labs(x = "Month", y = "Average monthly cases", title = 'D') +
+     labs(x = "Month", y = "Monthly cases", title = 'D') +
      theme_bw() +
      theme(legend.position = 'inside',
            legend.direction = "horizontal",

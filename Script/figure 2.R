@@ -1,6 +1,8 @@
 #####################################
-## @Description: 
-## @version: 
+## @Description: Generate Figure 2 (global and country-level inbound
+##               travel trends and Holt-Winters forecasts), and save
+##               figure2_workspace.RData for downstream risk analysis.
+## @version: 1.0
 ## @Author: Li Kangguo
 ## @Date: 2026-02-04 15:04:57
 ## @LastEditors: Li Kangguo

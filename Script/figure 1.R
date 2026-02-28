@@ -1,10 +1,12 @@
 #####################################
-## @Description: 
-## @version: 
+## @Description: Generate Figure 1 (NiV outbreaks, reservoir distribution,
+##               phylogeny) and derive reservoir risk indices and
+##               seasonal susceptibility model.
+## @version: 1.0
 ## @Author: Li Kangguo
 ## @Date: 2026-02-05 22:24:56
 ## @LastEditors: Li Kangguo
-## @LastEditTime: 2026-02-27 11:45:39
+## @LastEditTime: 2026-02-28 11:03:43
 #####################################
 
 library(sf)
@@ -18,51 +20,6 @@ library(phytools)
 library(ggthemes)
 library(ggspatial)
 library(maptiles)
-library(terra)
-
-# Output directory for figures
-out_dir <- "./Outcome/"
-outbreaks_path <- "./Data/Outbreak/outbreaks_nipah.csv"
-gbif_dir <- "./Data/GBIF/0013514-260129131611470.csv"
-globalmap_shp <- "./Data/globalmap/globalmap.shp"
-chinamap_shp <- "./Data/globalmap/china_border.shp"
-ncbi_tree <- "./Data/NCBI/nipah_80.aln.trim.fasta.treefile"
-ncbi_meta <- "./Data/NCBI/sequences.tsv"
-
-fill_color <- c("#462255FF", "#FF8811FF", "#9DD9D2FF", "#046E8FFF", "#D44D5CFF", "grey50")
-names(fill_color) <- c("Bangladesh", "India", "Malaysia", "Singapore", "Philippines", "Thailand")
-
-# panel A -----------------------------------------------------------------
-
-data_panel_A <- read.csv(outbreaks_path) |> 
-     mutate(cases = as.numeric(gsub('[^0-9]', '', cases)),
-            deaths = as.numeric(gsub('[^0-9]', '', deaths)),
-            # extract content before -
-            date = gsub('-.*$', '', started),
-            Date = mdy(date),
-            Year = year(Date),
-            id = ifelse(id == '', NA_character_, id),
-            country = factor(country, levels = names(fill_color)))
-
-p_cases <- ggplot(data_panel_A) +
-     geom_col(aes(x = Year, y = cases, fill = country)) +
-     scale_x_continuous(limits = c(1997, 2027),
-                        expand = expansion(add = c(0.5, 0.5)),
-                        breaks = seq(1998, 2026, by = 5)) +
-     scale_y_continuous(expand = expansion(mult = c(0, 0)),
-                        limits = c(0, 300),
-                        breaks = scales::pretty_breaks(n = 5)) +
-     scale_fill_manual(values = fill_color,
-                       name = 'Country') +
-     labs(title = 'A',
-          x = NULL,
-          y = 'Number of cases') +
-     theme_bw() +
-     theme(legend.position = 'none',
-           plot.title.position = 'plot',
-           panel.grid = element_blank(),
-           axis.text.x = element_blank())
-
 p_deaths <- ggplot(data_panel_A) +
      geom_col(aes(x = Year, y = deaths, fill = country),
               show.legend = T) +
@@ -251,7 +208,7 @@ country_iso_map <- c(
 # 1. Host Score (Ecological Potential from GBIF)
 gbif_risk <- data_panel_B |>
      filter(countryCode %in% names(country_iso_map)) |>
-     mutate(Country = country_iso_map[countryCode]) |>
+     mutate(Country = country_iso_map[as.character(countryCode)]) |>
      group_by(Country) |>
      summarise(
           GBIF_Recs = n(),
@@ -270,7 +227,7 @@ ncbi_risk <- tip_df2 |>
           .groups = "drop"
      )
 
-# 3. Composite Weighted Risk Calculation
+# 3. Composite Weighted Risk Calculation (Robust Z-Score Method)
 combined_risk <- tibble(Country = unname(country_iso_map)) |>
      left_join(gbif_risk, by = "Country") |>
      left_join(ncbi_risk, by = "Country") |>
@@ -281,69 +238,109 @@ combined_risk <- tibble(Country = unname(country_iso_map)) |>
           Last_Seq_Year = 2000
     )) |>
      mutate(
-          # A. Base Score: Ecological Presence (Log-dampened to avoid sampling bias)
-          # Weight: 1.0
-          Score_Host = log10(GBIF_Recs + 1),
+          # [Cor.1] Log-transform using consistent base (natural log)
+          log_Host  = log1p(GBIF_Recs),
+          log_Virus = log1p(NCBI_Seqs),
           
-          # B. Active Score: Viral Confirmation (Root-dampened but higher impact)
-          # Weight: 2.0 (Viral evidence > Host evidence)
-          # Explanation: 1 sequence proves presence more definitively than 100 bat sightings.
-          Score_Virus = sqrt(NCBI_Seqs) * 2, 
+          # [Cor.2] Robust Z-Score Calculation using scale()
+          z_Host_val  = as.numeric(scale(log_Host)),
+          z_Virus_val = as.numeric(scale(log_Virus)),
           
-          # C. Final Synthesis
-          Raw_Score = Score_Host + Score_Virus,
-          
-          # D. Scaling to 1.0 - 5.0 (Model Input Range)
-          Reservoir_Risk_Calculated = scales::rescale(Raw_Score, to = c(1, 5))
+          # If all values are identical (SD=0), scale() produces NaN. Replace with 0.
+          z_Host = if_else(is.nan(z_Host_val), 0, z_Host_val),
+          z_Virus = if_else(is.nan(z_Virus_val), 0, z_Virus_val),
+
+          # [Cor.3] Weighted Combination (NCBI=2x confirmed evidence)
+          Raw_Z_Score = (1 * z_Host + 2 * z_Virus) / 3,
+
+          # [Cor.4] Normalize to [0.01, 1]
+          Reservoir_Risk_Calculated = scales::rescale(Raw_Z_Score, to = c(0.01, 1))
      ) |>
      arrange(desc(Reservoir_Risk_Calculated))
 
 write.csv(combined_risk, file = "./Outcome/risk_assessment.csv", row.names = FALSE)
 
-# Fit Biological Seasonality Function -------------------------------------
+## Fit Biological Seasonality Function: Bootstrap resampling + GAM with cyclic splines
+library(mgcv)
+library(purrr)
 
-# We fit a simple harmonic regression on monthly-aggregated outbreak cases
-# using the historical outbreak table `data_panel_A`. The model is fit on
-# the log(1 + mean monthly cases) to stabilize variance. We save the fitted
-# model (and a small wrapper predict function) to `./Outcome/seasonal_model.rds`.
-
-# Prepare monthly-aggregated cases (Year-Month grid)
+# Prepare monthly-aggregated cases
 cases_monthly <- data_panel_A |>
      filter(!is.na(Date)) |>
      mutate(Year = year(Date), Month = month(Date)) |>
      group_by(Year, Month) |>
      summarise(Cases = sum(cases, na.rm = TRUE), .groups = 'drop')
 
-# Compute average cases per calendar month across years
+# Ensure months 1..12 appear at least in summary table
 monthly_avg <- cases_monthly |>
      group_by(Month) |>
      summarise(AvgCases = mean(Cases, na.rm = TRUE),
                SDcases = sd(Cases, na.rm = TRUE), .groups = 'drop') |>
+     complete(Month = 1:12, fill = list(AvgCases = 0, SDcases = 0)) |>
      arrange(Month)
 
-# Fit harmonic regression on log1p(AvgCases)
-# Model: log1p(AvgCases) ~ sin(2*pi*Month/12) + cos(2*pi*Month/12)
-harmonic_fit <- tryCatch({
-     lm(log1p(AvgCases) ~ sin(2 * pi * Month / 12) + cos(2 * pi * Month / 12), data = monthly_avg)
-}, error = function(e) {
-     # Fallback to simple mean model if fit fails
-     lm(log1p(AvgCases) ~ 1, data = monthly_avg)
-})
+# Bootstrap parameters
+B <- 1000
+set.seed(20260228)
+months <- 1:12
 
-# Create a small prediction wrapper that returns expected monthly multiplicative factor
-seasonal_predict <- function(month_vec) {
-     # month_vec can be numeric vector (1..12)
-     newdf <- data.frame(Month = as.integer((month_vec - 1) %% 12 + 1))
-     pred_log <- predict(harmonic_fit, newdata = newdf)
-     # convert back from log1p
-     pmax(0, exp(pred_log) - 1)
+# Container for bootstrap predictions
+boot_preds <- matrix(NA, nrow = B, ncol = length(months))
+
+for (b in seq_len(B)) {
+     # resample months (rows) with replacement
+     idx <- sample(nrow(cases_monthly), replace = TRUE)
+     boot_data <- cases_monthly[idx, , drop = FALSE]
+
+     # ensure there are enough unique month values to fit a cyclic spline
+     unique_months <- length(unique(boot_data$Month))
+     if (unique_months < 3) {
+          # not enough unique months to fit a cyclic spline; record NA and continue
+          boot_preds[b, ] <- NA_real_
+          next
+     }
+
+     # choose k adaptively: cannot exceed number of unique months
+     k_b <- min(6, unique_months)
+
+     # Fit GAM with cyclic spline; use Negative Binomial, fallback to Poisson
+     fit_b <- tryCatch({
+          gam(Cases ~ s(Month, bs = "cc", k = k_b), data = boot_data, family = nb(), method = "REML")
+     }, error = function(e) {
+          tryCatch({
+               gam(Cases ~ s(Month, bs = "cc", k = k_b), data = boot_data, family = poisson(), method = "REML")
+          }, error = function(e2) {
+               return(NULL)
+          })
+     })
+
+     if (is.null(fit_b)) {
+          boot_preds[b, ] <- NA_real_
+          next
+     }
+
+     # Predict expected counts for months 1..12 (if model fit succeeded)
+     pred_b <- predict(fit_b, newdata = data.frame(Month = months), type = "response")
+     boot_preds[b, ] <- as.numeric(pred_b)
 }
 
-# Save model and supporting data
+# Summarize bootstrap predictions: mean and 95% CI
+pred_mean  <- apply(boot_preds, 2, mean, na.rm = TRUE)
+pred_lower <- apply(boot_preds, 2, quantile, probs = 0.025, na.rm = TRUE)
+pred_upper <- apply(boot_preds, 2, quantile, probs = 0.975, na.rm = TRUE)
+
+# Prediction wrapper returns bootstrap mean by month
+seasonal_predict <- function(month_vec) {
+     pred_mean[((month_vec - 1) %% 12) + 1]
+}
+
 seasonal_model <- list(
-     fit = harmonic_fit,
+     boot_preds = boot_preds,
+     pred_mean = pred_mean,
+     pred_lower = pred_lower,
+     pred_upper = pred_upper,
      monthly_avg = monthly_avg,
      predict = seasonal_predict
 )
 
-save(seasonal_model, harmonic_fit, seasonal_predict, monthly_avg, file = "./Outcome/seasonal_model.RData")
+save(seasonal_model, seasonal_predict, file = "./Outcome/seasonal_model.RData")

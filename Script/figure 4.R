@@ -1,10 +1,12 @@
 #####################################
-## @Description: 
-## @version: 
+## @Description: Generate Figure 4 (probabilistic importation risk
+##               analysis and SPC-based grading) using outputs from
+##               Figures 2 and 3.
+## @version: 1.0
 ## @Author: Li Kangguo
 ## @Date: 2026-02-04 15:04:57
 ## @LastEditors: Li Kangguo
-## @LastEditTime: 2026-02-27 11:10:04
+## @LastEditTime: 2026-02-28 11:45:12
 #####################################
 
 library(openxlsx)
@@ -31,7 +33,8 @@ scientific_10 <- function(x) {
 #  - Seasonal_Index: estimated monthly susceptibility derived from the
 #    previously fitted seasonal model (./Outcome/seasonal_model.RData).
 #
-# Exposure_Score = Inbound_Volume * Reservoir_Risk * Spillover_Activity * Detection_Capacity * Seasonal_Index
+# Exposure_Score = Volume_Score * Reservoir_Risk * Spillover_Activity * Detection_Capacity * Seasonal_Index
+#   (all five factors are normalized to [0.01, 1]; Volume_Score = rescale(log1p(Inbound_Volume)))
 
 # Load previously computed epidemiological parameters
 # We use the per-country values calculated earlier and exported to
@@ -44,31 +47,38 @@ risk_metadata <- read.csv("./Outcome/fig3_risk_metadata.csv", stringsAsFactors =
 # Load estimated seasonal model and create a 1..12 seasonal index.
 # `seasonal_model$predict(1:12)` returns expected monthly averages;
 # we rescale these values to the index range used in the model (1..3).
-if (file.exists("./Outcome/seasonal_model.RData")) {
-     load("./Outcome/seasonal_model.RData")
-     if (exists("seasonal_model") && is.list(seasonal_model) && is.function(seasonal_model$predict)) {
-          seasonal_pred_vals <- seasonal_model$predict(1:12)
-          seasonal_index_vec <- scales::rescale(seasonal_pred_vals, to = c(1, 3))
-     } else {
-          seasonal_index_vec <- rep(1, 12)
-     }
-} else {
-     seasonal_index_vec <- rep(1, 12)
-}
+load("./Outcome/seasonal_model.RData")
+# Use bootstrap mean predictions if present
+seasonal_pred_vals <- if (!is.null(seasonal_model$pred_mean)) seasonal_model$pred_mean else seasonal_model$predict(1:12)
+# With bootstrap GAM output (raw expected counts), normalize to [0.1, 1] relative amplitude
+seasonal_index_vec <- scales::rescale(seasonal_pred_vals, to = c(0.1, 1))
 
 df_analyzed <- df_final |>
      left_join(risk_metadata, by = "Origin_Country") |>
      mutate(
-          # Fall back to conservative defaults when metadata is missing
-          Reservoir_Risk = replace_na(Reservoir_Risk, 1.0),
-          Spillover_Activity = replace_na(Spillover_Activity, 0.01),
-          Detection_Capacity = replace_na(Detection_Capacity, 0.5),
+          # Fall back to neutral mid-range defaults when risk metadata is missing.
+          # 0.5 represents unknown-but-non-negligible risk (not zero, not maximum).
+          Reservoir_Risk      = replace_na(Reservoir_Risk, 0.5),
+          Spillover_Activity  = replace_na(Spillover_Activity, 0.1),
+          Detection_Capacity  = replace_na(Detection_Capacity, 0.5),
 
-          # Seasonal factor: use the estimated monthly index
+          # Seasonal factor: monthly index normalized to [0.1, 1]
           Seasonal_Index = seasonal_index_vec[((Month - 1) %% 12) + 1],
 
-          # Composite exposure score using Detection_Capacity (replaces prior Endemic_Connectivity)
-          Exposure_Score = Inbound_Volume * Reservoir_Risk * Spillover_Activity * Detection_Capacity * Seasonal_Index
+          # Normalize inbound volume to [0.01, 1]:
+          #   Step 1 — Ensure Inbound_Volume is non-negative (Holt-Winters artifact safety)
+          Inbound_Volume = pmax(Inbound_Volume, 0),
+          #   Step 2 — log1p transformation compresses the large variance across countries.
+          Log_Volume   = log1p(Inbound_Volume),
+          #   Step 3 — min-max rescaling to [0.01, 1].
+          #   Note: We ungroup first or use global max/min to ensure scale is global.
+          Volume_Score = scales::rescale(Log_Volume, to = c(0.01, 1)),
+
+          # Composite Importation Risk Score — all five components are [0,1].
+          # The multiplicative structure reflects serial epidemiological dependency:
+          # each factor conditions the next (travel → reservoir → spillover →
+          # undetected → importation). If any link is near zero, overall risk is near zero.
+          Exposure_Score = Volume_Score * Reservoir_Risk * Spillover_Activity * Detection_Capacity * Seasonal_Index
      )
 
 # 3. Risk Grading System (Statistical Anomaly Standard)
@@ -84,39 +94,40 @@ df_analyzed <- df_final |>
 #   that routine inputs should be "Low/Moderate".
 # ==============================================================================
 
-# Calculate distribution parameters (Using all history + forecast context)
-# We use Log-transformation to normalize the skewed volume data
+eps <- 1e-6
+
 risk_stats <- df_analyzed |>
      filter(Exposure_Score > 0) |>
+     mutate(
+          Safe_Score = pmin(pmax(Exposure_Score, eps), 1 - eps)
+     ) |>
      summarise(
-          Log_Mean = mean(log10(Exposure_Score + 1)),
-          Log_SD = sd(log10(Exposure_Score + 1))
+          Logit_Mean = mean(log(Safe_Score / (1 - Safe_Score))),
+          Logit_SD = sd(log(Safe_Score / (1 - Safe_Score)))
      )
 
-thresh_base <- risk_stats$Log_Mean
-thresh_step <- risk_stats$Log_SD
+spc_base <- risk_stats$Logit_Mean
+spc_step <- risk_stats$Logit_SD
 
 df_analyzed <- df_analyzed |>
-     mutate(
-          # Z-Score helps quantify "How extreme is this month?"
-          Log_Score = log10(Exposure_Score + 1),
-          Risk_Level = case_when(
-               # > 3 SD from mean (Extreme Anomaly) -> Critical
-               Log_Score > (thresh_base + 3 * thresh_step) ~ "Level 5: Critical",
-               
-               # > 2 SD from mean (Rare High) -> High
-               Log_Score > (thresh_base + 2 * thresh_step) ~ "Level 4: High",
-               
-               # > 1 SD from mean (Seasonal Peak/High Vol) -> Moderate
-               Log_Score > (thresh_base + 1 * thresh_step) ~ "Level 3: Moderate",
-               
-               # > Mean -> Low
-               Log_Score > thresh_base ~ "Level 2: Low",
-               
-               # Following Mean -> Very Low
-               TRUE ~ "Level 1: Very Low"
-          )
-     )
+     mutate(Safe_Score = pmin(pmax(Exposure_Score, eps), 1 - eps),
+            Logit_Score = log(Safe_Score / (1 - Safe_Score)),
+            
+            Risk_Level_SPC = case_when(Logit_Score > (spc_base + 3 * spc_step) ~ "Level 5: Critical",   # > 3SD (极端罕见)
+                                       Logit_Score > (spc_base + 2 * spc_step) ~ "Level 4: High",       # > 2SD (显著异常)
+                                       Logit_Score > (spc_base + 1 * spc_step) ~ "Level 3: Moderate",   # > 1SD (需关注)
+                                       Logit_Score > (spc_base + 0.5 * spc_step) ~ "Level 2: Low",      # > 0.5SD (轻微偏高)
+                                       TRUE ~ "Level 1: Very Low")) |>
+     select(-Safe_Score) |> 
+     mutate(Risk_Level_Q = case_when(Exposure_Score > 0.95 ~ "Level 5: Critical",
+                                     Exposure_Score > 0.90 ~ "Level 4: High",
+                                     Exposure_Score > 0.75 ~ "Level 3: Moderate",
+                                     Exposure_Score > 0.50 ~ "Level 2: Low",
+                                     TRUE ~ "Level 1: Very Low"))
+
+df_analyzed$Risk_Level <- factor(df_analyzed$Risk_Level_SPC, levels = c(
+     "Level 1: Very Low", "Level 2: Low", "Level 3: Moderate", "Level 4: High", "Level 5: Critical"
+))
 
 # Order factors explicitly (Restoring full risk spectrum)
 df_analyzed$Risk_Level <- factor(df_analyzed$Risk_Level, levels = c(
@@ -174,15 +185,39 @@ p_risk_bar <- ggplot(df_forecast_only, aes(x = Date_Obj, y = Exposure_Score, fil
      facet_wrap(~Origin_Country, scales = "free_y", ncol = 1) +
      # Keep full color scale available for all risk levels
      scale_fill_brewer(palette = "RdYlGn", direction = -1, drop = FALSE) +
-     scale_y_continuous(labels = scientific_10,
+     # Remove scientific notation; use simple decimal for the [0,1] score
+     scale_y_continuous(labels = scales::number_format(accuracy = 0.0001),
                         limits = c(0, NA),
-                        expand = expansion(mult = c(0, 0.15))) +
+                        expand = expansion(mult = c(0, 0.2))) +
      scale_x_date(date_labels = "%b %Y",
                   date_breaks = "1 month",
                   expand = c(0, 0)) +
      labs(
           title = "B",
-          x = "Date", y = "Importation risk score"
+          x = "Date", y = "Importation risk score (SPC)"
+     ) +
+     theme_bw() +
+     theme(
+          legend.position = "none",
+          plot.title.position = "plot"
+     )
+
+df_forecast_only$Risk_Level_Q <- factor(df_forecast_only$Risk_Level_Q, levels = c(
+     "Level 1: Very Low", "Level 2: Low", "Level 3: Moderate", "Level 4: High", "Level 5: Critical"
+))
+p_risk_bar_q <- ggplot(df_forecast_only, aes(x = Date_Obj, y = Exposure_Score, fill = Risk_Level_Q)) +
+     geom_col(show.legend = F) +
+     facet_wrap(~Origin_Country, scales = "free_y", ncol = 1) +
+     scale_fill_brewer(palette = "RdYlGn", direction = -1, drop = FALSE) +
+     scale_y_continuous(labels = scales::number_format(accuracy = 0.0001),
+                        limits = c(0, NA),
+                        expand = expansion(mult = c(0, 0.2))) +
+     scale_x_date(date_labels = "%b %Y",
+                  date_breaks = "1 month",
+                  expand = c(0, 0)) +
+     labs(
+          title = "C",
+          x = "Date", y = "Importation risk score (Quantile)"
      ) +
      theme_bw() +
      theme(
@@ -191,12 +226,11 @@ p_risk_bar <- ggplot(df_forecast_only, aes(x = Date_Obj, y = Exposure_Score, fil
      )
 
 # Compose Figure 2
-fig2 <- p_risk_trend + p_risk_bar + plot_layout(widths = c(2, 1), guides = 'collect') &
+fig2 <- p_risk_trend + p_risk_bar + p_risk_bar_q + plot_layout(widths = c(2, 1, 1), guides = 'collect') &
      theme(legend.position = 'bottom')
 
 ggsave("./Outcome/fig4.png",
        fig2,
-       width = 16, 
-       height = 10, 
+       width = 20, 
+       height = 10,
        bg="white")
-
